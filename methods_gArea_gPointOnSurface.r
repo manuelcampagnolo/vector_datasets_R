@@ -20,4 +20,4 @@ nomerio<-"rio mondego"
 rio<-rios.etrs[which(grepl(pattern=nomerio,rios.etrs@data$DESIGNACAO,ignore.case = TRUE)),]
 plot(concelhos.etrs)
 plot(icnfv,add=TRUE,col="green")
-plot(rio,add=TRUE,col="blue")
+plot(rio,add=TRUE,col="blue") 
