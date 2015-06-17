@@ -10,8 +10,8 @@ library(grDevices)
 export<-FALSE
 
 # pasta de trabalho
-wd<-"Y:\\Aulas\\sigs_com_R\\dados_aulas"
-aulas<-"Y:\\Aulas\\sigs_com_R"
+wd<-"Y:\\Aulas\\CURSOS_R\\sigs_com_R\\dados_aulas"
+aulas<-"Y:\\Aulas\\CURSOS_R\\sigs_com_R"
 
 setwd(wd)
 
@@ -39,14 +39,19 @@ pov<-data.frame(
   codPostal=c("2710","2705","2646","2705","2705")
 )
 
-# criar SpatialPointsDataFrame
 wgs84<-"+proj=longlat +ellps=WGS84 +datum=WGS84"
+# criar SpatialPointsDataFrame: alternativa 1
 xy<-cbind(pov$long,pov$lat) # matrix de coordenadas long/lat
 # Criar objecto SpatialPoints
 # a função CRS cria um objecto de classe CRS
 xy.sp <- SpatialPoints(xy, proj4string=CRS(wgs84))
 # Criar objecto de classe SpatialPointsDataFrame
 pov.wgs<- SpatialPointsDataFrame(xy.sp,pov[,c("designa","codPostal")])
+
+# criar SpatialPointsDataFrame: alternativa 2
+pov.wgs<-pov # não é indespensável
+coordinates(pov.wgs)<- ~ long + lat # converte em objecto sp
+proj4string(pov.wgs) <- CRS(wgs84) # associa CRS
 
 # re-projectar para CRS ETRS
 etrs<-"+proj=tmerc +lat_0=39.6682583 +lon_0=-8.1331083 +k=1 +x_0=0 +y_0=0 +ellps=GRS80 +units=m"
