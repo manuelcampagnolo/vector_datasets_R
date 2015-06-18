@@ -11,6 +11,8 @@ wgs84<-"+proj=longlat +ellps=WGS84 +datum=WGS84"
 icnf.wgs<-spTransform(icnf,CRS(wgs84))
 writeOGR(icnf.wgs,dsn="icnf.kml",layer="areas_protegidas",driver="KML",overwrite_layer=TRUE)
 
+writeOGR(pov.wgs,dsn="pov_sintra.kml",layer="localidades",driver="KML",overwrite_layer=TRUE)
+
 # exportar raster para GeoTIFF
 writeRaster(mde.etrs,file="mde_sintra_cascais.tif",overwrite=TRUE)
 

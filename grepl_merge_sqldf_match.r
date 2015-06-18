@@ -1,17 +1,33 @@
-# criar uma data.frame com dois dos atributos de parc2005, mais as areas e perimetros das parcelas
-areas<-gArea(parc2005,byid=TRUE)
-perimetros<-gLength(parc2005,byid=TRUE)
-algumas.variaveis<-c("NOME_CULTU","COD_AJUDA")
-tabela<-cbind(parc2005@data[,algumas.variaveis],areas,perimetros)
-save(tabela,file="Y:\\Aulas\\CURSOS_R\\sigs_com_R\\df.culturas.RData")
-head(tabela)
+
+parcelas<-readOGR(dsn=getwd(),layer="parcRibatejo",encoding="ISO8859-1")
+head(parcRibatejo)
+
+levels(parcelas$COD_AJUDA)
+if (export)  png(paste(aulas,"parcelas_ribatejo.png",sep="\\"), width=600, height=600, res=120)
+par(mar=rep(0,4))
+plot(parcelas,col=c("green", "red", "yellow")[parcelas$COD_AJUDA])
+if (export) graphics.off()
+
+#tabela<-cbind(parc2005@data[,algumas.variaveis],areas,perimetros)
+#save(tabela,file="Y:\\Aulas\\CURSOS_R\\sigs_com_R\\df.culturas.RData")
+#head(tabela)
 
 # explorar nomes das culturas com expressões regulares
+nomes.culturas<-unique(as.character(parcelas$NOME_CULTU))
+length(nomes.culturas) # 56
+
+# Seleccionar algumas culturas:
+nomes.culturas[which(grepl(pattern="Vinha",nomes.culturas))]
+parcelas[which(grepl(pattern="Vinha",parcelas$NOME_CULTU)),]
+
 nomes.culturas<-unique(as.character(tabela$NOME_CULTU))
 length(nomes.culturas) # 56
 nomes.culturas[which(grepl(pattern="Vinha",nomes.culturas))]
 nomes.culturas[which(grepl(pattern="(p|P)ermanentes$",nomes.culturas))] # acaba em "permanentes" ou "Permanentes"
 nomes.culturas[which(grepl(pattern="?ermanentes$",nomes.culturas))] # ? pode ser qualquer caractér
+parcelas[which(grepl(pattern="?ermanentes$",parcelas$NOME_CULTU)),]
+
+
 nomes.culturas[which(grepl(pattern="[b-c]|[B-C]",nomes.culturas))] # contém um dos seguintes: b,c,B,C
 nomes.culturas[which(grepl(pattern="„",nomes.culturas))] # contem o símbolo "„"
 nomes.culturas[which(grepl(pattern="[^a-zA-Z0-9. ()/]",nomes.culturas))] #  contém caractér que não é letra, número, espaço, ponto, parêntesis ou /
@@ -25,7 +41,14 @@ bons<-c("Sup. forr. temp ou prados", "Pousio agronomico",
                "Area ripicola em abandono (mais de 3 anos)", "Tomate para industria",
                "Pera para industria", "Consociacao de especies elegiveis",
                "Maca", "Grao de bico", "Pessego para industria", "Tremocao doce")
-# substituir nomes antigos por nomes novos usando level
+
+# substituir nomes antigos por nomes novos usando level no objecto sp
+nomesantigos<-parcelas$NOME_CULTU # é um factor
+levels(nomesantigos)[levels(nomesantigos) %in% maus]<-bons #    
+parcelas$NOME_CULTU<-nomesantigos
+unique(as.character(parcelas$NOME_CULTU))
+
+# substituir nomes antigos por nomes novos usando level apenas na tabela de atributos
 nomesantigos<-tabela$NOME_CULTU # é um factor
 levels(nomesantigos)[levels(nomesantigos) %in% maus]<-bons #    [!which(grepl(pattern="[^a-zA-Z0-9. ()/]",nomes.culturas))]<-novos
 

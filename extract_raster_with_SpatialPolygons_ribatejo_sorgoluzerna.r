@@ -1,5 +1,11 @@
 ##################################################################################
 # Dados parcelas Ribatejo
+# exemplo parcelas agrícolas Ribatejo 
+parcelas<-readOGR(dsn=getwd(),layer="ParcelasAgricolas",encoding="ISO8859-1")
+# seleccionar culturas "Sorgo" e "Luzerna"
+sorgo.luzerna<-parcelas[parcelas@data$cultura=="Sorgo" | parcelas@data$cultura=="Luzerna",]
+writeOGR(sorgo.luzerna,dsn=getwd(),layer="SorgoLuzerna",driver="ESRI Shapefile",overwrite_layer=TRUE)
+
 # usar extract sobre um RasterBrick usando polígonos
 sorgo.luzerna<- readOGR(dsn=getwd(),layer="SorgoLuzerna",encoding="ISO8859-1")
 

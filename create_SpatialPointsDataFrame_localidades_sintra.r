@@ -36,7 +36,7 @@ pov<-data.frame(
   designa=c("Sintra","Colares","Alcabideche","Almoçageme","Azoia"),
   long=c(-9.3816589,-9.4426866999,-9.4098824999, -9.470629899,-9.476644970130),
   lat=c(38.8028687,38.8066307,38.7331569,38.7967822,38.769797300600),
-  codPostal=c("2710","2705","2646","2705","2705")
+  codPostal=c(2710,2705,2646,2705,2705)
 )
 
 wgs84<-"+proj=longlat +ellps=WGS84 +datum=WGS84"
@@ -49,10 +49,13 @@ xy.sp <- SpatialPoints(xy, proj4string=CRS(wgs84))
 pov.wgs<- SpatialPointsDataFrame(xy.sp,pov[,c("designa","codPostal")])
 
 # criar SpatialPointsDataFrame: alternativa 2
-pov.wgs<-pov # não é indespensável
-coordinates(pov.wgs)<- ~ long + lat # converte em objecto sp
-proj4string(pov.wgs) <- CRS(wgs84) # associa CRS
+coordinates(pov)<- ~ long + lat # converte em objecto sp
+proj4string(pov) <- CRS(wgs84) # associa CRS
+# cuidado: ao fazer isso o R usa o nome das colunas long/lat para as coordenadas
+# recuperar pov
+pov<-cbind(coordinates(pov),pov@data)
 
 # re-projectar para CRS ETRS
 etrs<-"+proj=tmerc +lat_0=39.6682583 +lon_0=-8.1331083 +k=1 +x_0=0 +y_0=0 +ellps=GRS80 +units=m"
 pov.etrs<-spTransform(pov.wgs,CRS(etrs))
+
