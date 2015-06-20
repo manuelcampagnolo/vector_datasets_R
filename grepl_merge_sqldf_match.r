@@ -1,3 +1,15 @@
+library(rgdal)
+library(sp)
+library(raster)
+library(rgeos)
+
+
+# pasta de trabalho
+wd<-"Y:\\Aulas\\CURSOS_R\\sigs_com_R\\dados_aulas"
+aulas<-"Y:\\Aulas\\CURSOS_R\\sigs_com_R"
+
+setwd(wd)
+getwd()
 
 parcelas<-readOGR(dsn=getwd(),layer="parcRibatejo",encoding="ISO8859-1")
 head(parcRibatejo)
@@ -17,16 +29,24 @@ nomes.culturas<-unique(as.character(parcelas$NOME_CULTU))
 length(nomes.culturas) # 56
 
 # Seleccionar algumas culturas:
-nomes.culturas[which(grepl(pattern="Vinha",nomes.culturas))]
-parcelas[which(grepl(pattern="Vinha",parcelas$NOME_CULTU)),]
+nomes.culturas[grepl(pattern="Vinha",nomes.culturas)]
+parcelas[grepl(pattern="Vinha",parcelas$NOME_CULTU),]
 
 nomes.culturas<-unique(as.character(tabela$NOME_CULTU))
 length(nomes.culturas) # 56
-nomes.culturas[which(grepl(pattern="Vinha",nomes.culturas))]
-nomes.culturas[which(grepl(pattern="(p|P)ermanentes$",nomes.culturas))] # acaba em "permanentes" ou "Permanentes"
-nomes.culturas[which(grepl(pattern="?ermanentes$",nomes.culturas))] # ? pode ser qualquer caractér
+nomes.culturas[grepl(pattern="Vinha",nomes.culturas)]
+nomes.culturas[grepl(pattern="(p|P)ermanentes$",nomes.culturas)] # acaba em "permanentes" ou "Permanentes"
+nomes.culturas[grepl(pattern="?ermanentes$",nomes.culturas)] # ? pode ser qualquer caractere
 parcelas[which(grepl(pattern="?ermanentes$",parcelas$NOME_CULTU)),]
 
+# slides
+nomes.culturas[grepl(pattern="(p|P)ermanentes$",nomes.culturas)] # acaba em "permanentes" ou "Permanentes"
+nomes.culturas[grepl(pattern="?ermanentes$",nomes.culturas)] # ? pode ser qualquer caractere
+parcelas[grepl(pattern="?ermanentes$",parcelas$NOME_CULTU),]
+
+nomes.culturas[grepl(pattern="[a-c]|[A-C]",nomes.culturas)] 
+
+nomes.culturas[grepl(pattern="[^a-zA-Z0-9. ()/]",nomes.culturas)] 
 
 nomes.culturas[which(grepl(pattern="[b-c]|[B-C]",nomes.culturas))] # contém um dos seguintes: b,c,B,C
 nomes.culturas[which(grepl(pattern="„",nomes.culturas))] # contem o símbolo "„"
@@ -34,6 +54,7 @@ nomes.culturas[which(grepl(pattern="[^a-zA-Z0-9. ()/]",nomes.culturas))] #  cont
 
 # criar uma tabela para substituir os nomes com símbolos indesejados por nomes mais amigáveis
 maus<-nomes.culturas[which(grepl(pattern="[^a-zA-Z0-9. ()/]",nomes.culturas))] #  contém caractér que não é letra, número, espaço, ponto, parêntesis ou /
+maus<-nomes.culturas[grepl(pattern="[^a-zA-Z0-9. ()/]",nomes.culturas)] 
 bons<-c("Sup. forr. temp ou prados", "Pousio agronomico", 
                "Hort. reg. intensivo ao ar livre", "Retirada terras obrig ou volunt",
                "Retirada obrig. biologica", "vegetacao ripicola",
@@ -41,7 +62,7 @@ bons<-c("Sup. forr. temp ou prados", "Pousio agronomico",
                "Area ripicola em abandono (mais de 3 anos)", "Tomate para industria",
                "Pera para industria", "Consociacao de especies elegiveis",
                "Maca", "Grao de bico", "Pessego para industria", "Tremocao doce")
-
+cbind(maus,bons)
 # substituir nomes antigos por nomes novos usando level no objecto sp
 nomesantigos<-parcelas$NOME_CULTU # é um factor
 levels(nomesantigos)[levels(nomesantigos) %in% maus]<-bons #    
@@ -58,6 +79,8 @@ levels(nomesantigos)[levels(nomesantigos) %in% maus]<-bons #    [!which(grepl(pa
 #
 # substituir nomes antigos por nomes novos com SQL
 # left join: cruza todas as linhas da tabela --- escreve NA quando não há "match"
+library(sqldf)
+tabela<-parcelas@data
 nomes<-data.frame(maus=maus,bons=bons)
 join.string<-"select tabela.*, nomes.bons from tabela left join nomes on tabela.NOME_CULTU=nomes.maus" 
 #join.string<-"select tabela.NOME_CULTU,  nomes.novos from tabela left join nomes on tabela.NOME_CULTU=nomes.antigos" 
@@ -75,7 +98,7 @@ tabela.join.nomes<-sqldf(join.string,stringsAsFactors=FALSE)
 head(tabela.join.nomes)
 
 # em R existe a função merge que pode ser usada em vez do join:
-tabela.merge.nomes<-merge(tabela,nomes,by.x="NOME_CULTU",by.y="antigos",all.x=TRUE)
+tabela.merge.nomes<-merge(tabela,nomes,by.x="NOME_CULTU",by.y="maus",all.x=TRUE)
 head(tabela.merge.nomes)
 tail(tabela.merge.nomes)
 str(tabela.merge.nomes) # a função merge origina novos atributos do tipo factor
