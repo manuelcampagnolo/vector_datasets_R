@@ -7,6 +7,7 @@ library(rgeos)
 # pasta de trabalho
 wd<-"Y:\\Aulas\\CURSOS_R\\sigs_com_R\\dados_aulas"
 aulas<-"Y:\\Aulas\\CURSOS_R\\sigs_com_R"
+aulas<-"F:\\sigs_com_R"
 
 setwd(wd)
 getwd()
@@ -17,8 +18,25 @@ head(parcRibatejo)
 levels(parcelas$COD_AJUDA)
 if (export)  png(paste(aulas,"parcelas_ribatejo.png",sep="\\"), width=600, height=600, res=120)
 par(mar=rep(0,4))
-plot(parcelas,col=c("green", "red", "yellow")[parcelas$COD_AJUDA])
+fichs <- list.files(pattern="banda")
+b<-brick(stack(as.list(fichs)))
+b.proj<-projectRaster(b,crs=parcelas@proj4string) # lento
+if (export) png(paste(aulas,"parcelas_ribatejo.png",sep="\\"), width=600, height=600, res=120)
+plotRGB(b.proj,r=4,g=3,b=2,stretch="lin") 
+plot(parcelas,col=c("green", "orange", "yellow")[parcelas$COD_AJUDA],add=TRUE)
+legend(x=parcelas@bbox["x","min"],y=parcelas@bbox["y","max"],legend=levels(parcelas$COD_AJUDA),fill=c("green", "orange", "yellow")) 
 if (export) graphics.off()
+
+
+if (export) png(paste(aulas,"parcelas_ribatejo_trigo.png",sep="\\"), width=600, height=600, res=120)
+plotRGB(b.proj,r=4,g=3,b=2,stretch="lin") 
+plot(parcelas,col=c("green", "orange", "yellow")[parcelas$COD_AJUDA],add=TRUE)
+expressao<-"((T|t)rigo.*(M|m)ole)|((T|t)riticale)"# ".*" é qualquer sequência de caracteres
+nomes.culturas[grepl(pattern=expressao,nomes.culturas)]
+plot(parcelas[grepl(pattern=expressao,parcelas$NOME_CULTU),],add=TRUE,col="purple")
+legend(x=parcelas@bbox["x","min"],y=parcelas@bbox["y","max"],legend=levels(parcelas$designacao),fill=c("green", "orange", "yellow")) 
+if (export) graphics.off()
+
 
 #tabela<-cbind(parc2005@data[,algumas.variaveis],areas,perimetros)
 #save(tabela,file="Y:\\Aulas\\CURSOS_R\\sigs_com_R\\df.culturas.RData")
